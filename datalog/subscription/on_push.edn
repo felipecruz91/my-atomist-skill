@@ -1,12 +1,15 @@
 [:find
- (pull
-   ?commit
-   [:git.commit/sha
-    :git.commit/message
-    {:git.commit/repo
-     [:git.repo/name
-      :git.repo/source-id
-      {:git.repo/org [:git.provider/url]}]}])
+     (pull
+      ?commit
+      [:git.commit/sha
+       :git.commit/message
+       {:git.commit/repo
+        [:git.repo/name
+         :git.repo/source-id
+         {:git.repo/org [:git.provider/url]}]}
+       {:git.commit/author [:git.user/name
+                            :git.user/login
+                            {:git.user/emails [:email.email/address]}]}])
  :in $ $before-db % ?ctx
  :where
- (push-tx ?ctx ?commit ?ref)]
+     (push-tx ?ctx ?commit ?ref)]

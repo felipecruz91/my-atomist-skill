@@ -15,6 +15,8 @@ func handleGitPush(ctx context.Context, req skill.RequestContext) skill.Status {
 	fmt.Printf("\nNew commit to repo %s\n", commit.Repo.Name)
 	fmt.Printf("revision: %s\n", commit.Sha)
 	fmt.Printf("message:  %s\n", commit.Message)
+	fmt.Printf("author name:  %s\n", commit.Author.Name)
+	fmt.Printf("author login:  %s\n", commit.Author.Login)
 
 	return skill.Status{
 		State:  skill.Completed,

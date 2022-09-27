@@ -8,7 +8,11 @@ import (
 type OnCommit struct {
 	Sha     string `edn:"git.commit/sha"`
 	Message string `edn:"git.commit/message"`
-	Repo    struct {
+	Author  struct {
+		Name  string `edn:"git.user/name"`
+		Login string `edn:"git.user/login"`
+	} `edn:"git.commit/author"`
+	Repo struct {
 		Org struct {
 			Url string `edn:"git.provider/url"`
 		} `edn:"git.repo/org"`

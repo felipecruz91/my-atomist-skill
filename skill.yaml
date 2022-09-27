@@ -1,0 +1,24 @@
+skill:
+  apiVersion: v2
+  name: my-atomist-skill # defaults to GitHub repository name
+  namespace: felipecruz91 # defaults to GitHub org name
+  displayName: "My Atomist Skill #1"
+  description: Sample Skill
+  author: felipecruz91
+  license: Apache-2.0
+#  iconUrl: https://raw.githubusercontent.com/vonwig/skill-sample-2/main/docs/images/icon.svg
+  homepageUrl: https://github.com/felipecruz91/my-atomist-skill
+  longDescription: add a description
+#  parameters:
+#    - string:
+#        name: param1
+#        required: false
+#        displayName: Optional String Parameter
+#        description: Optional String Parameter
+#    - webhook:
+#        name: event
+#        displayName: Event Webhook
+#        description: Ingest data from the outside world
+#        required: false
+#        authorizationTypes:
+#          - httpBasic

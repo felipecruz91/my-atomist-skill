@@ -1,0 +1,8 @@
+github.com/atomist-skills/go-skill v0.0.5 h1:mhmJ7nt+XPwb+Axm3vQLV1kxSg70NRs4ARP+2HO6DPQ=
+github.com/atomist-skills/go-skill v0.0.5/go.mod h1:dn8GSaB1FBuK7yeRlQZ2mpDhVUKB8c0WZAw8wJ9FktI=
+github.com/atomist-skills/go-skill v0.0.6-0.20220909100321-db77942ad598 h1:jSPxR+Dr/5MRHjpgxFpOneOIYAtndzJLsc6xAaOSZ/8=
+github.com/atomist-skills/go-skill v0.0.6-0.20220909100321-db77942ad598/go.mod h1:mNoVITYKBogxE1YJpprKOj+1MLobwnbLsejAdQ3Y8SA=
+github.com/google/uuid v1.3.0 h1:t6JiXgmwXMjEs8VusXIJk2BXHsn+wx8BZdTaoZ5fu7I=
+github.com/google/uuid v1.3.0/go.mod h1:TIyPZe4MgqvfeYDBFedMoGGpEw/LqOeaOT+nhxU+yHo=
+olympos.io/encoding/edn v0.0.0-20201019073823-d3554ca0b0a3 h1:slmdOY3vp8a7KQbHkL+FLbvbkgMqmXojpFUO/jENuqQ=
+olympos.io/encoding/edn v0.0.0-20201019073823-d3554ca0b0a3/go.mod h1:oVgVk4OWVDi43qWBEyGhXgYxt7+ED4iYNpTngSLX2Iw=

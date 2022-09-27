@@ -4,6 +4,13 @@ import (
 	"github.com/atomist-skills/go-skill"
 )
 
+type OnDockerfile struct {
+	Repository struct {
+		Host string `edn:"docker.repository/host"`
+		Name string `edn:"docker.repository/repository"`
+	} `edn:"docker.file.from/repository"`
+}
+
 // OnCommit maps the incoming commit of the on_push and on_commit_signature to a Go struct
 type OnCommit struct {
 	Sha     string `edn:"git.commit/sha"`

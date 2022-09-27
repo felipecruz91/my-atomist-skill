@@ -1,0 +1,29 @@
+[:find
+
+ (pull
+  ?line
+  [*
+   {:docker.file.from/repository [
+                                  :docker.repository/host
+                                  :docker.repository/repository
+                                  ]}
+   ])
+
+ (pull
+  ?commit
+  [:git.commit/sha
+   :git.commit/message
+   {:git.commit/repo
+    [:git.repo/name
+     :git.repo/source-id
+     {:git.repo/org [
+                      :git.provider/url
+                      :github.org/installation-token
+                      ]}]}])
+ :in $ $before-db % ?ctx
+ :where
+ (attributes-tx ?ctx ?commit :git.commit/file ?file)
+ [?line :docker.file.line/file ?file]
+ [?line :docker.file.line/instruction "FROM"]
+
+ ]

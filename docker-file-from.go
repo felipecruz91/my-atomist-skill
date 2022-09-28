@@ -60,7 +60,7 @@ func handleDockerfileFrom(ctx context.Context, req skill.RequestContext) skill.S
 	if len(baseAndNewImages) == 0 {
 		return skill.Status{
 			State:  skill.Info,
-			Reason: fmt.Sprintf("unable to identify Chainguard distroless image replacement for %v", baseAndNewImages),
+			Reason: "unable to identify Chainguard distroless replacement images in Dockerfile",
 		}
 	}
 

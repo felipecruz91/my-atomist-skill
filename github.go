@@ -185,7 +185,6 @@ func createPR(ctx context.Context, client *github.Client, prSubject, prRepoOwner
 }
 
 func createPRBody(baseAndNewImages map[string]string) string {
-
 	var sb strings.Builder
 	sb.WriteString("This pull request replaces the following base image(s):\n")
 
@@ -193,6 +192,16 @@ func createPRBody(baseAndNewImages map[string]string) string {
 		sb.WriteString(fmt.Sprintf("- the Docker base image `%s` to `%s`", baseImage, newBaseImage))
 		sb.WriteString("\n")
 	}
+
+	sb.WriteString(`
+---
+
+Chainguard Images is a collection of container images designed for **minimalism** and **security**.
+
+Many of these images are **distroless**; they contain only an application and its runtime dependencies. There is no shell or package manager.
+
+They provide **SBOM support** and **signatures** for known provenance and more secure base images.
+`)
 
 	return sb.String()
 }

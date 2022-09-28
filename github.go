@@ -135,8 +135,8 @@ func pushCommit(ctx context.Context, client *github.Client, ref *github.Referenc
 
 	// Create the commit using the tree.
 	authorName := "atomist-bot"
-	authorEmail := "authorEmail@email.com"
-	commitMessage := "Update Docker final base image"
+	authorEmail := "bot@atomist.com"
+	commitMessage := "Replace Docker base image(s)"
 	date := time.Now()
 	author := &github.CommitAuthor{Date: &date, Name: &authorName, Email: &authorEmail}
 	commit := &github.Commit{Author: author, Message: &commitMessage, Tree: tree, Parents: []*github.Commit{parent.Commit}}
@@ -182,4 +182,17 @@ func createPR(ctx context.Context, client *github.Client, prSubject, prRepoOwner
 
 	fmt.Printf("PR created: %s\n", pr.GetHTMLURL())
 	return nil
+}
+
+func createPRBody(baseAndNewImages map[string]string) string {
+
+	var sb strings.Builder
+	sb.WriteString("This pull request replaces the following base image(s):\n")
+
+	for baseImage, newBaseImage := range baseAndNewImages {
+		sb.WriteString(fmt.Sprintf("- the Docker base image `%s` to `%s`", baseImage, newBaseImage))
+		sb.WriteString("\n")
+	}
+
+	return sb.String()
 }

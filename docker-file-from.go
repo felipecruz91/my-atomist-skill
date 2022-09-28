@@ -93,16 +93,14 @@ func handleDockerfileFrom(ctx context.Context, req skill.RequestContext) skill.S
 	}
 
 	if err := createPR(ctx, client,
-		github.String("Replace Docker base image(s) to Chainguard distroless"),
+		github.String("Replace Docker base image(s) with Chainguard distroless"),
 		github.String(sourceOwner),
 		github.String(sourceOwner),
 		github.String(commitBranch),
 		github.String(sourceRepo),
 		github.String(sourceRepo),
 		github.String(baseBranch),
-		github.String(fmt.Sprintf(`
-Body
-`))); err != nil {
+		github.String(createPRBody(baseAndNewImages))); err != nil {
 		log.Fatalf("Error while creating the pull request: %s", err)
 	}
 	if err != nil {

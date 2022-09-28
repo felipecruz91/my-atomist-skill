@@ -43,6 +43,8 @@ func handleDockerfileFrom(ctx context.Context, req skill.RequestContext) skill.S
 			newBaseImage = "cgr.dev/chainguard/busybox"
 		case "golang":
 			newBaseImage = "cgr.dev/chainguard/go"
+		case "nginx":
+			newBaseImage = "cgr.dev/chainguard/nginx"
 		}
 
 		fmt.Printf("newBaseImage:  %s\n", newBaseImage)

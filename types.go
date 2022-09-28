@@ -21,7 +21,8 @@ type OnCommit struct {
 	} `edn:"git.commit/author"`
 	Repo struct {
 		Org struct {
-			Url string `edn:"git.provider/url"`
+			Url               string `edn:"git.provider/url"`
+			GithubAccessToken string `edn:"github.org/installation-token"`
 		} `edn:"git.repo/org"`
 		SourceId string `edn:"git.repo/source-id"`
 		Name     string `edn:"git.repo/name"`
@@ -64,4 +65,23 @@ type MistyBug struct {
 	Id      string
 	Summary string
 	State   string
+}
+
+type RepositoryFileContent struct {
+	Name        string `json:"name"`
+	Path        string `json:"path"`
+	Sha         string `json:"sha"`
+	Size        int    `json:"size"`
+	URL         string `json:"url"`
+	HTMLURL     string `json:"html_url"`
+	GitURL      string `json:"git_url"`
+	DownloadURL string `json:"download_url"`
+	Type        string `json:"type"`
+	Content     string `json:"content"`
+	Encoding    string `json:"encoding"`
+	Links       struct {
+		Self string `json:"self"`
+		Git  string `json:"git"`
+		HTML string `json:"html"`
+	} `json:"_links"`
 }

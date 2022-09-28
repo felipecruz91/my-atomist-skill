@@ -1,7 +1,7 @@
 skill:
   apiVersion: v2
   name: my-atomist-skill # defaults to GitHub repository name
-  namespace: felipecruz91 # defaults to GitHub org name
+  namespace: felipecruz91hackathon # defaults to GitHub org name
   displayName: "My Atomist Skill #1"
   description: Sample Skill
   author: felipecruz91

@@ -1,14 +1,10 @@
 [:find
-
  (pull
   ?line
   [*
-   {:docker.file.from/repository [
-                                  :docker.repository/host
-                                  :docker.repository/repository
-                                  ]}
-   ])
-
+   {:docker.file.from/repository
+    [:docker.repository/host
+     :docker.repository/repository]}])
  (pull
   ?commit
   [:git.commit/sha
@@ -16,15 +12,17 @@
    {:git.commit/repo
     [:git.repo/name
      :git.repo/source-id
-     {:git.repo/org [
-                      :git.provider/url
-                      :github.org/installation-token
-                      :git.org/name
-                      ]}]}])
+     {:git.repo/org
+      [:git.provider/url :github.org/installation-token
+                         :git.org/name]}]}])
  :in $ $before-db % ?ctx
  :where
- (attributes-tx ?ctx ?commit :git.commit/file ?file)
+ (or-join [?ctx ?commit ?file]
+          (attributes-tx ?ctx ?commit :git.commit/file ?file)
+          (and
+           (attributes-tx ?ctx ?line :docker.file.line/file ?file)
+           [?commit :git.commit/file ?file]))
+ [?ref :git.ref/commit ?commit]
+ (is-default-branch? ?ref)
  [?line :docker.file.line/file ?file]
- [?line :docker.file.line/instruction "FROM"]
-
- ]
+ [?line :docker.file.line/instruction "FROM"]]

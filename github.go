@@ -12,6 +12,25 @@ import (
 	"time"
 )
 
+type RepositoryFileContent struct {
+	Name        string `json:"name"`
+	Path        string `json:"path"`
+	Sha         string `json:"sha"`
+	Size        int    `json:"size"`
+	URL         string `json:"url"`
+	HTMLURL     string `json:"html_url"`
+	GitURL      string `json:"git_url"`
+	DownloadURL string `json:"download_url"`
+	Type        string `json:"type"`
+	Content     string `json:"content"`
+	Encoding    string `json:"encoding"`
+	Links       struct {
+		Self string `json:"self"`
+		Git  string `json:"git"`
+		HTML string `json:"html"`
+	} `json:"_links"`
+}
+
 // getRef returns the commit branch reference object if it exists or creates it
 // from the base branch before returning it.
 func getRef(ctx context.Context, client *github.Client, sourceOwner, sourceRepo, commitBranch, baseBranch string) (ref *github.Reference, err error) {
@@ -51,9 +70,9 @@ func getTree(ctx context.Context, client *github.Client, ref *github.Reference, 
 			return nil, err
 		}
 
-		contentStr := strings.Replace(string(content), "FROM "+baseImage, "FROM "+newBaseImage, 1)
+		replacedContent := ReplaceWithNewBaseImage(string(content), baseImage, newBaseImage)
 
-		entries = append(entries, &github.TreeEntry{Path: github.String(file), Type: github.String("blob"), Content: github.String(contentStr), Mode: github.String("100644")})
+		entries = append(entries, &github.TreeEntry{Path: github.String(file), Type: github.String("blob"), Content: github.String(replacedContent), Mode: github.String("100644")})
 	}
 
 	tree, _, err = client.Git.CreateTree(ctx, sourceOwner, sourceRepo, *ref.Object.SHA, entries)
@@ -93,18 +112,17 @@ func getFileContent(fileArg, sourceOwner, sourceRepo, accessToken string) (targe
 	if err := json.NewDecoder(resp.Body).Decode(&repoFileContent); err != nil {
 		return "", nil, err
 	}
-	fmt.Println(repoFileContent)
 
 	rawDecodedFileContent, err := base64.StdEncoding.DecodeString(repoFileContent.Content)
 	if err != nil {
 		return "", nil, err
 	}
 
-	return targetName, []byte(rawDecodedFileContent), err
+	return targetName, rawDecodedFileContent, err
 }
 
 // pushCommit creates the commit in the given reference using the given tree.
-func pushCommit(ctx context.Context, client *github.Client, ref *github.Reference, tree *github.Tree, sourceOwner, sourceRepo string) (err error) {
+func pushCommit(ctx context.Context, client *github.Client, ref *github.Reference, tree *github.Tree, sourceOwner, sourceRepo, newBaseImage string) (err error) {
 	// Get the parent commit to attach the commit to.
 	parent, _, err := client.Repositories.GetCommit(ctx, sourceOwner, sourceRepo, *ref.Object.SHA, nil)
 	if err != nil {
@@ -114,9 +132,9 @@ func pushCommit(ctx context.Context, client *github.Client, ref *github.Referenc
 	parent.Commit.SHA = parent.SHA
 
 	// Create the commit using the tree.
-	authorName := "authorName"
+	authorName := "atomist-bot"
 	authorEmail := "authorEmail@email.com"
-	commitMessage := "commitMessage"
+	commitMessage := fmt.Sprintf("Update Docker final base image %s", newBaseImage)
 	date := time.Now()
 	author := &github.CommitAuthor{Date: &date, Name: &authorName, Email: &authorEmail}
 	commit := &github.Commit{Author: author, Message: &commitMessage, Tree: tree, Parents: []*github.Commit{parent.Commit}}

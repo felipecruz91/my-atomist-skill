@@ -19,6 +19,7 @@
      {:git.repo/org [
                       :git.provider/url
                       :github.org/installation-token
+                      :git.org/name
                       ]}]}])
  :in $ $before-db % ?ctx
  :where

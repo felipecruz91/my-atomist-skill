@@ -15,12 +15,9 @@ type OnDockerfile struct {
 type OnCommit struct {
 	Sha     string `edn:"git.commit/sha"`
 	Message string `edn:"git.commit/message"`
-	Author  struct {
-		Name  string `edn:"git.user/name"`
-		Login string `edn:"git.user/login"`
-	} `edn:"git.commit/author"`
-	Repo struct {
+	Repo    struct {
 		Org struct {
+			Name              string `edn:"git.org/name"`
 			Url               string `edn:"git.provider/url"`
 			GithubAccessToken string `edn:"github.org/installation-token"`
 		} `edn:"git.repo/org"`
@@ -42,46 +39,4 @@ type GitCommitEntity struct {
 	Sha  string        `edn:"git.commit/sha,omitempty"`
 	Repo GitRepoEntity `edn:"git.commit/repo,omitempty"`
 	Url  string        `edn:"git.provider/url,omitempty"`
-}
-
-type BugEntity struct {
-	skill.Entity
-	ID      string `edn:"bug/id,omitempty"`
-	System  string `edn:"bug/system,omitempty"`
-	Summary string `edn:"bug/summary,omitempty"`
-	State   string `edn:"bug/state,omitempty"`
-}
-
-type LinkedBugEntity struct {
-	skill.Entity
-	Commit  GitCommitEntity `edn:"bug/commit,omitempty"`
-	ID      string          `edn:"bug/id,omitempty"`
-	System  string          `edn:"bug/system,omitempty"`
-	Summary string          `edn:"bug/summary,omitempty"`
-	State   string          `edn:"bug/state,omitempty"`
-}
-
-type MistyBug struct {
-	Id      string
-	Summary string
-	State   string
-}
-
-type RepositoryFileContent struct {
-	Name        string `json:"name"`
-	Path        string `json:"path"`
-	Sha         string `json:"sha"`
-	Size        int    `json:"size"`
-	URL         string `json:"url"`
-	HTMLURL     string `json:"html_url"`
-	GitURL      string `json:"git_url"`
-	DownloadURL string `json:"download_url"`
-	Type        string `json:"type"`
-	Content     string `json:"content"`
-	Encoding    string `json:"encoding"`
-	Links       struct {
-		Self string `json:"self"`
-		Git  string `json:"git"`
-		HTML string `json:"html"`
-	} `json:"_links"`
 }

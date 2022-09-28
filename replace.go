@@ -1,11 +1,9 @@
 package main
 
 import (
-	"fmt"
-	"regexp"
+	"strings"
 )
 
 func ReplaceWithNewBaseImage(content, baseImage, newBaseImage string) string {
-	var re = regexp.MustCompile(fmt.Sprintf(`(?m)FROM %s?:(.*)`, baseImage))
-	return re.ReplaceAllString(content, "FROM "+newBaseImage)
+	return strings.ReplaceAll(content, baseImage, newBaseImage)
 }

@@ -5,7 +5,8 @@ import (
 )
 
 type OnDockerfile struct {
-	Repository struct {
+	DockerfileLineArgsString string `edn:"docker.file.line/args-string"`
+	Repository               struct {
 		Host string `edn:"docker.repository/host"`
 		Name string `edn:"docker.repository/repository"`
 	} `edn:"docker.file.from/repository"`

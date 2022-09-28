@@ -31,7 +31,7 @@ COPY --from=build /work/hello /hello
 CMD ["/hello"]`
 
 	expected := `# syntax=docker/dockerfile:1.4
-FROM golang:1.17-alpine as build
+FROM cgr.dev/chainguard/go as build
 
 WORKDIR /work
 
@@ -54,7 +54,8 @@ FROM cgr.dev/chainguard/alpine-base
 COPY --from=build /work/hello /hello
 CMD ["/hello"]`
 
-	actual := ReplaceWithNewBaseImage(input, "alpine", "cgr.dev/chainguard/alpine-base")
+	actual := ReplaceWithNewBaseImage(input, "golang:1.17-alpine", "cgr.dev/chainguard/go")
+	actual = ReplaceWithNewBaseImage(actual, "alpine:3.11", "cgr.dev/chainguard/alpine-base")
 
 	require.Equal(t, expected, actual)
 }

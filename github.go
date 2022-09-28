@@ -59,7 +59,7 @@ func getRef(ctx context.Context, client *github.Client, sourceOwner, sourceRepo,
 
 // getTree generates the tree to commit based on the given files and the commit
 // of the ref you got in getRef.
-func getTree(ctx context.Context, client *github.Client, ref *github.Reference, sourceFiles, sourceOwner, sourceRepo, accessToken, baseImage, newBaseImage string) (tree *github.Tree, err error) {
+func getTree(ctx context.Context, client *github.Client, ref *github.Reference, sourceFiles, sourceOwner, sourceRepo, accessToken string, baseAndNewImages map[string]string) (tree *github.Tree, err error) {
 	// Create a tree with what to commit.
 	entries := []*github.TreeEntry{}
 
@@ -69,8 +69,10 @@ func getTree(ctx context.Context, client *github.Client, ref *github.Reference, 
 		if err != nil {
 			return nil, err
 		}
-
-		replacedContent := ReplaceWithNewBaseImage(string(content), baseImage, newBaseImage)
+		replacedContent := string(content)
+		for baseImage, newBaseImage := range baseAndNewImages {
+			replacedContent = ReplaceWithNewBaseImage(replacedContent, baseImage, newBaseImage)
+		}
 
 		entries = append(entries, &github.TreeEntry{Path: github.String(file), Type: github.String("blob"), Content: github.String(replacedContent), Mode: github.String("100644")})
 	}
@@ -122,7 +124,7 @@ func getFileContent(fileArg, sourceOwner, sourceRepo, accessToken string) (targe
 }
 
 // pushCommit creates the commit in the given reference using the given tree.
-func pushCommit(ctx context.Context, client *github.Client, ref *github.Reference, tree *github.Tree, sourceOwner, sourceRepo, newBaseImage string) (err error) {
+func pushCommit(ctx context.Context, client *github.Client, ref *github.Reference, tree *github.Tree, sourceOwner, sourceRepo string) (err error) {
 	// Get the parent commit to attach the commit to.
 	parent, _, err := client.Repositories.GetCommit(ctx, sourceOwner, sourceRepo, *ref.Object.SHA, nil)
 	if err != nil {
@@ -134,7 +136,7 @@ func pushCommit(ctx context.Context, client *github.Client, ref *github.Referenc
 	// Create the commit using the tree.
 	authorName := "atomist-bot"
 	authorEmail := "authorEmail@email.com"
-	commitMessage := fmt.Sprintf("Update Docker final base image %s", newBaseImage)
+	commitMessage := "Update Docker final base image"
 	date := time.Now()
 	author := &github.CommitAuthor{Date: &date, Name: &authorName, Email: &authorEmail}
 	commit := &github.Commit{Author: author, Message: &commitMessage, Tree: tree, Parents: []*github.Commit{parent.Commit}}

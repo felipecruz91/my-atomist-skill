@@ -6,6 +6,7 @@ import (
 	"github.com/google/go-github/v47/github"
 	"golang.org/x/oauth2"
 	"log"
+	"strings"
 	"time"
 
 	"github.com/atomist-skills/go-skill"
@@ -13,40 +14,51 @@ import (
 )
 
 func handleDockerfileFrom(ctx context.Context, req skill.RequestContext) skill.Status {
-	result := req.Event.Context.Subscription.Result[0]
-	dockerfileFrom := util.Decode[OnDockerfile](result[0])
-	commit := util.Decode[OnCommit](result[1])
+	results := req.Event.Context.Subscription.Result
+
+	commit := util.Decode[OnCommit](results[0][1])
 
 	fmt.Printf("\nNew commit to repo %s in org %s\n", commit.Repo.Name, commit.Repo.Org)
 	fmt.Printf("revision: %s\n", commit.Sha)
 	fmt.Printf("message:  %s\n", commit.Message)
-	fmt.Printf("dockerfileFrom:  %+v\n", dockerfileFrom)
-	if dockerfileFrom.Repository.Host != "hub.docker.com" {
-		return skill.Status{
-			State:  skill.Completed,
-			Reason: "No base image from hub.docker.com",
+
+	baseAndNewImages := make(map[string]string)
+
+	for _, result := range results {
+		dockerfileFrom := util.Decode[OnDockerfile](result[0])
+		fmt.Printf("dockerfileFrom:  %+v\n", dockerfileFrom)
+
+		// If host is hub.docker.com, replace final image with Chainguard distroless image
+		if dockerfileFrom.Repository.Host != "hub.docker.com" {
+			continue
 		}
+
+		var newBaseImage string
+
+		baseImage := dockerfileFrom.Repository.Name
+		switch baseImage {
+		case "alpine":
+			newBaseImage = "cgr.dev/chainguard/alpine-base"
+		case "busybox":
+			newBaseImage = "cgr.dev/chainguard/busybox"
+		case "golang":
+			newBaseImage = "cgr.dev/chainguard/go"
+		}
+
+		fmt.Printf("newBaseImage:  %s\n", newBaseImage)
+
+		// dockerfileFrom.DockerfileLineArgsString examples could be:
+		// "nginx" or "alpine:3.11" or "golang:1.17-alpine as build"
+		// so we have to get just the image name (first token)
+		key := strings.Split(dockerfileFrom.DockerfileLineArgsString, " ")[0]
+		baseAndNewImages[key] = newBaseImage // e.g. map["alpine:3.11"] = "cgr.dev/chainguard/alpine-base"
 	}
+	fmt.Println(baseAndNewImages)
 
-	// If host is hub.docker.com, replace final image with Chainguard distroless image
-
-	var newBaseImage string
-
-	baseImage := dockerfileFrom.Repository.Name
-	switch baseImage {
-	case "alpine":
-		newBaseImage = "cgr.dev/chainguard/alpine-base"
-	case "busybox":
-		newBaseImage = "cgr.dev/chainguard/busybox"
-	case "golang":
-		newBaseImage = "cgr.dev/chainguard/go"
-	}
-	fmt.Printf("newBaseImage:  %s\n", newBaseImage)
-
-	if newBaseImage == "" {
+	if len(baseAndNewImages) == 0 {
 		return skill.Status{
 			State:  skill.Info,
-			Reason: fmt.Sprintf("unable to identify a Chainguard distroless image replacement for %s ", baseImage),
+			Reason: fmt.Sprintf("unable to identify Chainguard distroless image replacement for %v", baseAndNewImages),
 		}
 	}
 
@@ -71,24 +83,26 @@ func handleDockerfileFrom(ctx context.Context, req skill.RequestContext) skill.S
 	}
 
 	sourceFiles := "Dockerfile"
-	tree, err := getTree(ctx, client, ref, sourceFiles, sourceOwner, sourceRepo, commit.Repo.Org.GithubAccessToken, baseImage, newBaseImage)
+	tree, err := getTree(ctx, client, ref, sourceFiles, sourceOwner, sourceRepo, commit.Repo.Org.GithubAccessToken, baseAndNewImages)
 	if err != nil {
 		log.Fatalf("Unable to create the tree based on the provided files: %s\n", err)
 	}
 
-	if err := pushCommit(ctx, client, ref, tree, sourceOwner, sourceRepo, newBaseImage); err != nil {
+	if err := pushCommit(ctx, client, ref, tree, sourceOwner, sourceRepo); err != nil {
 		log.Fatalf("Unable to create the commit: %s\n", err)
 	}
 
 	if err := createPR(ctx, client,
-		github.String(fmt.Sprintf("Replace Docker base image from %s to Chainguard distroless", dockerfileFrom.Repository.Name)),
+		github.String("Replace Docker base image(s) to Chainguard distroless"),
 		github.String(sourceOwner),
 		github.String(sourceOwner),
 		github.String(commitBranch),
 		github.String(sourceRepo),
 		github.String(sourceRepo),
 		github.String(baseBranch),
-		github.String("Body message")); err != nil {
+		github.String(fmt.Sprintf(`
+Body
+`))); err != nil {
 		log.Fatalf("Error while creating the pull request: %s", err)
 	}
 	if err != nil {

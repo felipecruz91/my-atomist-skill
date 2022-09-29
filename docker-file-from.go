@@ -47,6 +47,8 @@ func handleDockerfileFrom(ctx context.Context, req skill.RequestContext) skill.S
 			newBaseImage = "cgr.dev/chainguard/nginx"
 		case "python":
 			newBaseImage = "cgr.dev/chainguard/python"
+		case "php":
+			newBaseImage = "cgr.dev/chainguard/php"
 		}
 
 		fmt.Printf("newBaseImage:  %s\n", newBaseImage)
